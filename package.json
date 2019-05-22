@@ -32,8 +32,8 @@
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
-    "test": "mocha --compilers coffee:coffee-script --grep Module",
-    "full-test": "mocha --compilers coffee:coffee-script",
+    "test": "mocha --require coffeescript/register --grep Module test/*",
+    "full-test": "mocha --require coffeescript/register test/*",
     "valgrind": "coffee -c test/usb.coffee; valgrind --leak-check=full --show-possibly-lost=no node --expose-gc --trace-gc node_modules/mocha/bin/_mocha -R spec"
   },
   "binary": {
@@ -43,12 +43,15 @@
     "remote_path": "{version}"
   },
   "dependencies": {
-    "nan": "^2.8.0",
+    "nan": "2.13.2",
     "node-pre-gyp": "^0.11.0"
   },
+  "resolutions": {
+    "**/nan": "2.13.2"
+  },
   "devDependencies": {
-    "coffee-script": "~1.6.2",
-    "mocha": "~1.8.2",
+    "coffeescript": "~2.4.1",
+    "mocha": "~6.1.4",
     "aws-sdk": "~2.0.0-rc.15"
   },
   "license": "MIT"
