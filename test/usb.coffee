@@ -2,6 +2,10 @@ assert = require('assert')
 util = require('util')
 usb = require("../usb.js")
 
+if process.env.CI
+	console.log 'Tests cannot be run inside containers/CI.'
+	process.exit 0
+
 if typeof gc is 'function'
 	# running with --expose-gc, do a sweep between tests so valgrind blames the right one
 	afterEach -> gc()
