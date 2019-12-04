@@ -63,7 +63,11 @@ extern "C" void Initialize(Local<Object> target) {
 
 	// Initialize libusb. On error, halt initialization.
 	int res = libusb_init(&usb_context);
-	target->Set(Nan::New<String>("INIT_ERROR").ToLocalChecked(), Nan::New<Number>(res));
+	target->Set(
+		Nan::GetCurrentContext(),
+		Nan::New<String>("INIT_ERROR").ToLocalChecked(),
+		Nan::New<Number>(res)
+	);
 	if (res != 0) {
 		return;
 	}
@@ -112,8 +116,9 @@ NAN_METHOD(GetDeviceList) {
 
 	Local<Array> arr = Nan::New<Array>(cnt);
 
+	auto context = Nan::GetCurrentContext();
 	for(int i = 0; i < cnt; i++) {
-		arr->Set(i, Device::get(devs[i]));
+		arr->Set(context, i, Device::get(devs[i]));
 	}
 	libusb_free_device_list(devs, true);
 	info.GetReturnValue().Set(arr);
@@ -296,6 +301,10 @@ void initConstants(Local<Object> target){
 Local<Value> libusbException(int errorno) {
 	const char* err = libusb_error_name(errorno);
 	Local<Value> e  = Nan::Error(err);
-	e.As<v8::Object>()->Set(Nan::New<String>("errno").ToLocalChecked(), Nan::New<Integer>(errorno));
+	e.As<v8::Object>()->Set(
+		Nan::GetCurrentContext(),
+		Nan::New<String>("errno").ToLocalChecked(),
+		Nan::New<Integer>(errorno)
+	);
 	return e;
 }

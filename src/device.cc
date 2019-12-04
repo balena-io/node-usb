@@ -74,8 +74,9 @@ static NAN_METHOD(deviceConstructor) {
 	int ret = libusb_get_port_numbers(self->device, &port_numbers[0], MAX_PORTS);
 	if (ret > 0) {
 		Local<Array> array = Nan::New<Array>(ret);
+		auto context = Nan::GetCurrentContext();
 		for (int i = 0; i < ret; ++ i) {
-			array->Set(i, Nan::New(port_numbers[i]));
+			array->Set(context, i, Nan::New(port_numbers[i]));
 		}
     Nan::DefineOwnProperty(info.This(), V8SYM("portNumbers"), array, CONST_PROP);
 	}
@@ -102,18 +103,19 @@ Local<Object> Device::cdesc2V8(libusb_config_descriptor * cdesc){
 	Local<Array> v8interfaces = Nan::New<Array>(cdesc->bNumInterfaces);
 	Nan::DefineOwnProperty(v8cdesc, V8SYM("interfaces"), v8interfaces);
 
+	auto context = Nan::GetCurrentContext();
 	for (int idxInterface = 0; idxInterface < cdesc->bNumInterfaces; idxInterface++) {
 		int numAltSettings = cdesc->interface[idxInterface].num_altsetting;
 
 		Local<Array> v8altsettings = Nan::New<Array>(numAltSettings);
-		v8interfaces->Set(idxInterface, v8altsettings);
+		v8interfaces->Set(context, idxInterface, v8altsettings);
 
 		for (int idxAltSetting = 0; idxAltSetting < numAltSettings; idxAltSetting++) {
 			const libusb_interface_descriptor& idesc =
 				cdesc->interface[idxInterface].altsetting[idxAltSetting];
 
 			Local<Object> v8idesc = Nan::New<Object>();
-			v8altsettings->Set(idxAltSetting, v8idesc);
+			v8altsettings->Set(context, idxAltSetting, v8idesc);
 
 			STRUCT_TO_V8(v8idesc, idesc, bLength)
 			STRUCT_TO_V8(v8idesc, idesc, bDescriptorType)
@@ -135,7 +137,7 @@ Local<Object> Device::cdesc2V8(libusb_config_descriptor * cdesc){
 				const libusb_endpoint_descriptor& edesc = idesc.endpoint[idxEndpoint];
 
 				Local<Object> v8edesc = Nan::New<Object>();
-				v8endpoints->Set(idxEndpoint, v8edesc);
+				v8endpoints->Set(context, idxEndpoint, v8edesc);
 
 				STRUCT_TO_V8(v8edesc, edesc, bLength)
 				STRUCT_TO_V8(v8edesc, edesc, bDescriptorType)
@@ -170,9 +172,10 @@ NAN_METHOD(Device_GetAllConfigDescriptors){
 	struct libusb_device_descriptor dd;
 	libusb_get_device_descriptor(self->device, &dd);
 	Local<Array> v8cdescriptors = Nan::New<Array>(dd.bNumConfigurations);
+	auto context = Nan::GetCurrentContext();
 	for(uint8_t i = 0; i < dd.bNumConfigurations; i++){
 		libusb_get_config_descriptor(self->device, i, &cdesc);
-		v8cdescriptors->Set(i, Device::cdesc2V8(cdesc));
+		v8cdescriptors->Set(context, i, Device::cdesc2V8(cdesc));
 		libusb_free_config_descriptor(cdesc);
 	}
 	info.GetReturnValue().Set(v8cdescriptors);
@@ -388,5 +391,9 @@ void Device::Init(Local<Object> target){
 	Nan::SetPrototypeMethod(tpl, "__attachKernelDriver", AttachKernelDriver);
 
 	device_constructor.Reset(tpl);
-	target->Set(Nan::New("Device").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+	target->Set(
+		Nan::GetCurrentContext(),
+		Nan::New("Device").ToLocalChecked(),
+		Nan::GetFunction(tpl).ToLocalChecked()
+	);
 }
