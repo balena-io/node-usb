@@ -153,5 +153,9 @@ void Transfer::Init(Local<Object> target){
 	Nan::SetPrototypeMethod(tpl, "submit", Transfer_Submit);
 	Nan::SetPrototypeMethod(tpl, "cancel", Transfer_Cancel);
 
-	target->Set(Nan::New("Transfer").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+	target->Set(
+		Nan::GetCurrentContext(),
+		Nan::New("Transfer").ToLocalChecked(),
+		Nan::GetFunction(tpl).ToLocalChecked()
+	);
 }
