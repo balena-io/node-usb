@@ -50,8 +50,7 @@
   },
   "devDependencies": {
     "coffeescript": "~2.4.1",
-    "mocha": "~6.1.4",
-    "aws-sdk": "~2.0.0-rc.15"
+    "mocha": "~6.1.4"
   },
   "license": "MIT"
 }
