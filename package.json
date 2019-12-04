@@ -42,8 +42,8 @@
     "remote_path": "{version}"
   },
   "dependencies": {
-    "nan": "2.13.2",
-    "node-pre-gyp": "^0.11.0"
+    "nan": "^2.14.0",
+    "node-pre-gyp": "^0.14.0"
   },
   "resolutions": {
     "**/nan": "2.13.2"
